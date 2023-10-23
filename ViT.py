@@ -33,12 +33,9 @@ class PatchEmbedding(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         b, _, _, _ = x.shape
         x = self.projection(x)
-        print(x.size())
         cls_tokens = repeat(self.cls_token, '() n e -> b n e', b=b)
         # prepend the cls token to the input
         x = torch.cat([cls_tokens, x], dim=1)
-        print(f'x size: {x.size()}')
-        print(f'p size: {self.positions.size()}')
         # add position embedding
         x += self.positions
         return x
@@ -139,8 +136,3 @@ class visionTransformer(nn.Sequential):
             TransformerEncoder(depth, emb_size=emb_size, **kwargs),
             ClassificationHead(emb_size, n_classes)
         )
-
-img = Image.open('data/cat.jpg')
-transform = Compose([Resize((224, 224)), ToTensor()])
-x = transform(img)
-x = x.unsqueeze(0) # add batch dim

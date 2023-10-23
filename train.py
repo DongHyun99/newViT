@@ -39,7 +39,7 @@ test_transform = transforms.Compose(
 train_transform = transforms.Compose(
     [
         transforms.RandomHorizontalFlip(),
-        transforms.RandomResizedCrop((256, 256), scale=(0.8, 1.0), ratio=(0.9, 1.1)),
+        transforms.RandomResizedCrop((32, 32), scale=(0.8, 1.0), ratio=(0.9, 1.1)),
         transforms.ToTensor(),
         transforms.Normalize([0.49139968, 0.48215841, 0.44653091], [0.24703223, 0.24348513, 0.26158784]),
     ]
@@ -131,13 +131,13 @@ def train_model(**kwargs):
 
 model, results = train_model(
     model_kwargs={
-        "embed_dim": 512,
+        "embed_dim": 768,
         "hidden_dim": 512,
         "num_heads": 8,
-        "num_layers": 6,
-        "patch_size": 16,
+        "num_layers": 12,
+        "patch_size": 4,
         "num_channels": 3,
-        "num_patches": 256,
+        "num_patches": 64,
         "num_classes": 10,
         "dropout": 0.2,
     },

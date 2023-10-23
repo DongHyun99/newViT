@@ -4,7 +4,7 @@ Postitional Encoding은 다음과 같은 방식을 사용한다.
 
 $$
 \begin{align}
-PE(pos, 2i) &= \sin(pos/10000^{2i/d_{nodel}}) \tag{}
+PE(pos, 2i) &= \sin(pos/10000^{2i/d_{nodel}})
 \\
 PE(pos, 2i+1) &= \cos(pos/10000^{2i/d_{nodel}})
 \end{align}
