@@ -65,8 +65,16 @@ for idx in range(1,value+1):
     x = rearrange(x, f'b c e (h1 h2) w -> b c e h2 (h1 w)', h1=2) # 1 cycle
     x = rearrange(x, f'b c e h (w1 w2) -> b (c w1) e h w2 ', w1=4) # new channel
 
+#print(x.shape)
+#x = rearrange(x, f'b (c1 c2) e h w -> b c1 e h (c2 w)', c2=4)
+#x = rearrange(x, f'b c e h (w1 w2) -> b c e (w1 h) w2', w1=2)
+#x = rearrange(x, f'b (c1 c2) e h w -> b c1 e h (c2 w)', c2=4)
+#x = rearrange(x, f'b c e h (w1 w2) -> b c e (w1 h) w2', w1=2)
+
+#print(x.shape)
+
 x = rearrange(x, 'b c e h w -> h (c w) (e b)') * 255.0 / patch_size**2
-print(x.shape)
+
 x = np.array(x.detach(), dtype=np.uint8)
 x = cv2.cvtColor(x, cv2.COLOR_RGB2BGR)
 cv2.imwrite('32.png', x)

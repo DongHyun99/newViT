@@ -8,7 +8,7 @@ from torch import Tensor
 from einops.layers.torch import Rearrange, Reduce
 from einops import rearrange, reduce, repeat
 
-from positional_encoding import sinusoidal_PE_2d
+from positional_encoding.positional_encoding import sinusoidal_PE_2d
 
 class PatchEmbedding(nn.Module):
     def __init__(self, in_channels: int = 3, patch_size: int = 16, emb_size: int = 768, img_size: int = 224, dimension: bool = False):

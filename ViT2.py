@@ -16,7 +16,7 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
 
-from positional_encoding import sinusoidal_PE_2d
+from positional_encoding.positional_encoding import sinusoidal_PE_2d
 from einops import repeat
 
 def img_to_patch(x, patch_size, flatten_channels=True):
