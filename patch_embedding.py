@@ -32,9 +32,9 @@ class PatchEmbedding(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         b, _, _, _ = x.shape
         x = self.projection(x)
-        #cls_tokens = repeat(self.cls_token, '() n e -> b n e', b=b)
+        cls_tokens = repeat(self.cls_token, '() n e -> b n e', b=b)
         # prepend the cls token to the input
-        #x = torch.cat([cls_tokens, x], dim=1)
+        x = torch.cat([cls_tokens, x], dim=1)
         # add position embedding
         return x
 

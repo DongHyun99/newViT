@@ -39,4 +39,4 @@ class getPositionalcoordinate(nn.Module):
     #def sinusoidal_PE()
 
 pos = getPositionalcoordinate(stage_num=4)
-print(pos)
+print(pos.Coordinates)

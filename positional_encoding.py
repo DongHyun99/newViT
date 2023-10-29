@@ -1,6 +1,7 @@
 import torch
-
-from torch import nn
+import numpy as np
+from einops import rearrange
+import matplotlib.pyplot as plt
 
 def sinusoidal_PE_2d(num_patches_2d, dim):
     if dim % 2 != 0:
@@ -15,41 +16,59 @@ def sinusoidal_PE_2d(num_patches_2d, dim):
 
     return pe
 
-
-def sec2Point(point, elem):
-    x, y = point
-    return {1:[x-elem, y-elem], 2:[x+elem, y-elem], 3:[x-elem, y + elem], 4:[x+elem, y + elem]}
-
-def divideSection(secions, elem):
-    if type(secions[1]) is list:
-        return {i:sec2Point(secions[i], elem) for i in range(1,5)}
-    return {
-        i:divideSection(secions[i], elem) for i in range(1,5)
-    }
-
-class getPositionalcoordinate(nn.Module):
+def coordinateList(stage: int, focus: np.ndarray = np.array([1.0, 1.0]), radius: float = 1.0):
     
-    def getCoordinates(self, stage_num, initPoint):
-        dics, elem = {}, initPoint[0]
-        for stage in range(stage_num):
-            if stage == 0:
-                elem /= 2
-                dics = {'stage0' : sec2Point(initPoint, elem)}
-                continue    
-            stageVal = dics['stage' + str(stage-1)]
-            elem /= 2
-            dics['stage' + str(stage)] = divideSection(stageVal, elem)
-        return dics
+    if stage == 0:
+        return np.expand_dims(focus, 0)
     
-    def __init__(self, stage_num: int, initPoiont = [1,1]):
-        """_summary_
+    else:
+        radius /= 2
+        return np.concatenate((coordinateList(stage-1, np.array([focus[0]-radius, focus[1]-radius]), radius),
+        coordinateList(stage-1, np.array([focus[0]+radius, focus[1]-radius]), radius),
+        coordinateList(stage-1, np.array([focus[0]-radius, focus[1]+radius]), radius),
+        coordinateList(stage-1, np.array([focus[0]+radius, focus[1]+radius]), radius)))
 
-        Args:
-            stage_num (int): Stage Number.
-            initPoiont (list, optional): _description_. Defaults to [1,1].
-        """
-        self.stage_num = stage_num
-        self.Coordinates = self.getCoordinates(stage_num, initPoiont)
+def getPositionalCoordinate(stage_num: int, focus: list = [1.0, 1.0]):
+    
+    coordinate = {}
+    
+    for stage in range(stage_num+1):
+        coordinate[stage] = coordinateList(stage, focus)
+            
+    return coordinate      
 
-pos = getPositionalcoordinate(stage_num=4)
-print(pos.Coordinates)
+       
+def heatmap(hit_position: dict, position_value: dict, stage:int = 1, count: int = 0):
+    
+    coordinate = np.array([])
+    
+    for position in range(count*4, count*4+4):
+        if position in hit_position[stage]:
+            coordinate = np.append(coordinate, position_value[stage][position])
+            
+        else:
+            value = heatmap(hit_position, position_value, stage+1, position)
+            coordinate = np.append(coordinate, value)
+            
+    return coordinate
+
+# test
+hit_position = {1:[0,2], 2:[4,7,14,15], 3:[20,21,22,23,24,25,26,27,48,49,50,51,52,53,54,55]}
+pos = getPositionalCoordinate(stage_num=3)
+hit_position = rearrange(heatmap(hit_position, pos), '(v c) -> v c', c=2)
+print(hit_position)
+
+# visualizing
+plt.figure(figsize=(10, 10))
+plt.xlim(0.0, 2.0)
+plt.ylim(0.0, 2.0)
+plt.gca().invert_yaxis()
+for idx, val in enumerate(hit_position):
+    plt.scatter(val[0], val[1], label=idx)
+plt.legend()
+plt.savefig('coordinate.png')
+
+# positional encoding
+hit_position = torch.Tensor(hit_position)
+print(hit_position)
+print(sinusoidal_PE_2d(hit_position, 512))
