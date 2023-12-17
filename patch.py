@@ -35,18 +35,19 @@ class PatchDivideLayer(nn.Module):
         x_divide = rearrange(x, 'b n c -> b c n')
         x_divide = self.divideLayer(x_divide)
         x_divide = rearrange(x_divide, 'b c n -> b n c')
-        N = x_divide.shape[0]
+
         print('1. 패치 쪼개기 : ', x_divide.shape)
         out = []
-        for b in range(B):
-            batch_x = x[b]
+        for b in range(B):  # batch 사이즈 마다 수행
+            batch_x = x[b]      # x*4
             tmp = []
             for secIdx in range(len(batch_x)):
-                if selcted_infos[b,secIdx] == 0:
-                    tmp.append(x[b, secIdx].unsqueeze(dim=0))
-                else:
+                if selcted_infos[b, secIdx] == 1:    # 해당 section을 쪼갤시
                     tmp.append(x_divide[b, 4*secIdx: 4*secIdx + 4])
-                print(secIdx, ' : ', selcted_infos[b,secIdx], tmp[-1].shape)
+                else:                              
+                    tmp.append(x[b, secIdx].unsqueeze(dim=0))
+                    
+                print('[', b,'batch] ', secIdx, ' : ', selcted_infos[b,secIdx], tmp[-1].shape)
             out.append(torch.concat(tmp, dim=0).unsqueeze(dim=0))
             
         return torch.concat(out, dim = 0)
